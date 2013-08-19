@@ -5,6 +5,7 @@ import net.joshdevins.rabbitmq.client.ha.HaConnectionFactory;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -58,6 +59,7 @@ public class RabbitBlockingConsumerIntegrationTest {
 						haConnectionFactory, "localhost"));
 	}
 
+	@Ignore("infinite loop")
 	@Test
 	public void testAsyncConsume() throws InterruptedException {
 

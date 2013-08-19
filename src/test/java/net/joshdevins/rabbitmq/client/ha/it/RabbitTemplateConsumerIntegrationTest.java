@@ -23,6 +23,7 @@ import net.joshdevins.rabbitmq.client.ha.HaConnectionFactory;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.amqp.core.Message;
@@ -53,6 +54,7 @@ public class RabbitTemplateConsumerIntegrationTest {
                 "devins-ubuntu-vm01"));
     }
 
+    @Ignore("infinite loop")
     @Test
     public void testSyncConsume() throws UnsupportedEncodingException, InterruptedException {
 
