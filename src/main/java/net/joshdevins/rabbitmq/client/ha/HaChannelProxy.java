@@ -19,6 +19,12 @@ package net.joshdevins.rabbitmq.client.ha;
 import java.io.IOException;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.joshdevins.rabbitmq.client.ha.retry.RetryStrategy;
@@ -42,6 +48,8 @@ public class HaChannelProxy implements InvocationHandler {
 
     private static final String CLOSE_METHOD_NAME = "close";
 
+    private static final Set<String> REPLAYABLE_METHOD_NAMES = new HashSet<String>(Arrays.asList("basicQos", "confirmSelect", "flow", "txSelect"));
+
     private final HaConnectionProxy connectionProxy;
 
     private Channel target;
@@ -51,6 +59,8 @@ public class HaChannelProxy implements InvocationHandler {
     private final BooleanReentrantLatch connectionLatch;
 
     private final ConcurrentHashMap<Consumer, HaConsumerProxy> consumerProxies;
+
+    private final Map<Method, Object[]> callsToReplay = new HashMap<Method, Object[]>();
 
     public HaChannelProxy(final HaConnectionProxy connectionProxy, final Channel target,
             final RetryStrategy retryStrategy) {
@@ -136,6 +146,10 @@ public class HaChannelProxy implements InvocationHandler {
                         }
                     }
 
+                    if (REPLAYABLE_METHOD_NAMES.contains(method.getName())) {
+                        callsToReplay.put(method, args);
+                    }
+
                     // delegate all other method invocations
                     return InvocationHandlerUtils.delegateMethodInvocation(method, args, target);
 
@@ -191,7 +205,7 @@ public class HaChannelProxy implements InvocationHandler {
         connectionLatch.open();
     }
 
-    protected void setTargetChannel(final Channel target) {
+    protected void setTargetChannel(final Channel target) throws IOException {
 
         assert target != null;
 
@@ -202,6 +216,18 @@ public class HaChannelProxy implements InvocationHandler {
         synchronized (this.target) {
 
             this.target = target;
+
+            for (Entry<Method, Object[]> callToReplay : callsToReplay.entrySet()) {
+                try {
+                    InvocationHandlerUtils.delegateMethodInvocation(callToReplay.getKey(), callToReplay.getValue(), target);
+                } catch (Throwable e) {
+                    if (e instanceof IOException) {
+                        throw (IOException) e;
+                    } else {
+                        throw new IOException("error replaying call", e);
+                    }
+                }
+            }
 
             if (LOG.isDebugEnabled() && this.target != null) {
                 LOG.debug("Replaced channel: channel=" + this.target.toString());
