@@ -260,14 +260,14 @@ public class HaConnectionFactory extends ConnectionFactory {
     /**
      * Wraps a raw {@link Connection} with an HA-aware proxy.
      * 
-     * @see ConnectionFactory#newConnection(Address[], int)
+     * @see ConnectionFactory#newConnection(ExecutorService, Address[])
      */
     @Override
-    public Connection newConnection(final Address[] addrs) throws IOException {
+    public Connection newConnection(ExecutorService executor, Address[] addrs) throws IOException {
 
         Connection target = null;
         try {
-            target = super.newConnection(addrs);
+            target = super.newConnection(executor, addrs);
 
         } catch (IOException ioe) {
             LOG.warn("Initial connection failed, wrapping anyways and letting reconnector go to work: "
