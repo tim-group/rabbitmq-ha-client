@@ -1,12 +1,12 @@
 /*
  * Copyright 2010 Josh Devins
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -25,9 +25,6 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import net.joshdevins.rabbitmq.client.ha.retry.BlockingRetryStrategy;
-import net.joshdevins.rabbitmq.client.ha.retry.RetryStrategy;
-
 import org.apache.commons.lang.Validate;
 import org.apache.log4j.Logger;
 
@@ -38,18 +35,21 @@ import com.rabbitmq.client.ConnectionFactory;
 import com.rabbitmq.client.ShutdownListener;
 import com.rabbitmq.client.ShutdownSignalException;
 
+import net.joshdevins.rabbitmq.client.ha.retry.BlockingRetryStrategy;
+import net.joshdevins.rabbitmq.client.ha.retry.RetryStrategy;
+
 /**
  * A simple {@link ConnectionFactory} proxy that further proxies any created {@link Connection} and subsequent
  * {@link Channel}s. Sadly a dynamic proxy
  * cannot be used since the RabbitMQ {@link ConnectionFactory} does not have an
  * interface. As such, this class extends {@link ConnectionFactory} and
  * overrides necessary methods.
- * 
+ *
  * <p>
  * TODO: Create utility to populate some connections in the CachingConnectionFactory on startup. Should fail fast but
  * will reconnect using this underlying.
  * </p>
- * 
+ *
  * @author Josh Devins
  */
 public class HaConnectionFactory extends ConnectionFactory {
@@ -259,7 +259,7 @@ public class HaConnectionFactory extends ConnectionFactory {
 
     /**
      * Wraps a raw {@link Connection} with an HA-aware proxy.
-     * 
+     *
      * @see ConnectionFactory#newConnection(ExecutorService, Address[])
      */
     @Override
@@ -344,7 +344,7 @@ public class HaConnectionFactory extends ConnectionFactory {
     }
 
     private Connection newTargetConnection(final Address[] addrs) throws IOException {
-        return super.newConnection(addrs);
+        return super.newConnection(null, addrs);
     }
 
     private void setDefaultRetryStrategy() {
