@@ -45,7 +45,7 @@ public final class HaUtils {
             return isShutdownRecoverable((ShutdownSignalException) ioe.getCause());
         }
 
-        return true;
+        return false;
     }
 
     /**
