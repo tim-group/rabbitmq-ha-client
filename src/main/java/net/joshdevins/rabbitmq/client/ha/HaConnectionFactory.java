@@ -294,7 +294,7 @@ public class HaConnectionFactory extends ConnectionFactory {
      *
      * @see #newConnection(com.rabbitmq.client.Address[])
      */
-    public Connection newConnectionNonBlocking(Address[] addrs) throws IOException {
+    public Connection newConnectionNonBlocking(Address[] addrs) {
         ConnectionSet connectionPair = createConnectionProxy(addrs, null);
         ReconnectionTask task = new ReconnectionTask(false, connectionPair.listener, connectionPair.proxy);
         executorService.submit(task);
@@ -306,7 +306,7 @@ public class HaConnectionFactory extends ConnectionFactory {
      *
      * @see #newConnection()
      */
-    public Connection newConnectionNonBlocking() throws IOException {
+    public Connection newConnectionNonBlocking() {
         return newConnectionNonBlocking(
                 new Address[] {new Address(getHost(), getPort())}
         );
