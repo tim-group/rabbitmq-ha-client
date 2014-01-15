@@ -290,6 +290,29 @@ public class HaConnectionFactory extends ConnectionFactory {
     }
 
     /**
+     * Wraps a raw {@link Connection} with an HA-aware proxy, and initiates the connection in an auxiliary thread.
+     *
+     * @see #newConnection(com.rabbitmq.client.Address[])
+     */
+    public Connection newConnectionNonBlocking(Address[] addrs) throws IOException {
+        ConnectionSet connectionPair = createConnectionProxy(addrs, null);
+        ReconnectionTask task = new ReconnectionTask(false, connectionPair.listener, connectionPair.proxy);
+        executorService.submit(task);
+        return connectionPair.wrapped;
+    }
+
+    /**
+     * Wraps a raw {@link Connection} with an HA-aware proxy, and initiates the connection in an auxiliary thread.
+     *
+     * @see #newConnection()
+     */
+    public Connection newConnectionNonBlocking() throws IOException {
+        return newConnectionNonBlocking(
+                new Address[] {new Address(getHost(), getPort())}
+        );
+    }
+
+    /**
      * Allows setting a {@link Set} of {@link HaConnectionListener}s. This is
      * ammenable for Spring style property setting. Note that this will override
      * any existing listeners!
