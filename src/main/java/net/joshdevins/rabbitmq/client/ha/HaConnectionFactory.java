@@ -258,6 +258,16 @@ public class HaConnectionFactory extends ConnectionFactory {
     }
 
     /**
+     * Free resources held by this connection factory.
+     *
+     * This currently just shuts down the executor service used to launch reconnection tasks. It does not drop all
+     * connections created through this connection factory.
+     */
+    public void dispose() {
+        executorService.shutdownNow();
+    }
+
+    /**
      * Wraps a raw {@link Connection} with an HA-aware proxy.
      *
      * @see ConnectionFactory#newConnection(ExecutorService, Address[])
