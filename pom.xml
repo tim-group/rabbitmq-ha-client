@@ -186,7 +186,15 @@
                     <show>private</show>
                     <nohelp>true</nohelp>
                 </configuration>
-            </plugin>
+                 <executions>
+                    <execution>
+                        <id>attach-javadoc</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+           </plugin>
         </plugins>
     </build>
 
